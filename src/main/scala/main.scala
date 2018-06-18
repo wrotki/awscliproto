@@ -24,25 +24,27 @@ object Hello extends App {
                       jobList: Seq[JobSummary]
                     )
 
+  case class FoldState(
+                      first: Boolean,
+                      sum: Int
+                      )
+
+  def foldExample: Unit = {
+    val fld = Seq(1,2,3).foldLeft(0)()
+  }
+
   def listAllJobs(): Unit = {
 
-    val first: Future[JobList] = listPageOfJobs(first = true, nextToken = null)
-
-    def loop(nt: String, currList: Seq[JobList]): Future[Seq[JobList]] = {
-      listPageOfJobs(first = false, nextToken = nt) flatMap { sjl =>
+    def loop(first: Boolean, nt: String, currList: Seq[JobList]): Future[Seq[JobList]] = {
+      listPageOfJobs(first, nextToken = nt) flatMap { sjl =>
         sjl.nextToken match {
           case null => Future(currList :+ sjl)
-          case nxt => loop(sjl.nextToken, currList :+ sjl)
+          case nxt => loop(false, sjl.nextToken, currList :+ sjl)
         }
       }
     }
 
-    val listFuture: Future[Seq[JobList]] = first flatMap { jl =>
-      jl.nextToken match {
-        case null => Future(Seq(jl))
-        case nxt => loop(jl.nextToken, Seq(jl))
-      }
-    }
+    val listFuture = loop(true, null, Seq())
 
     Await.result(listFuture, 1 minute)
     val list = listFuture.value.get.get
