@@ -30,7 +30,9 @@ object Hello extends App {
                       )
 
   def foldExample: Unit = {
-    val fld = Seq(1,2,3).foldLeft(0)()
+    val fld = Seq(1,2,3).foldLeft(FoldState(first = true, sum = 0))( (fs: FoldState, el: Int) => {
+        FoldState(first = false, fs.sum + el)
+      })
   }
 
   def listAllJobs(): Unit = {
