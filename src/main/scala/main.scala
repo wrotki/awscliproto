@@ -26,34 +26,21 @@ object Hello extends App {
 
   def listAllJobs(): Unit = {
 
-    //    val seq = Seq(1,2,3)
-    //    val foldeded = seq.foldLeft[Int](0)(op = (acc: Int, a) => {
-    //      acc + a
-    //    })
-    //    println(s"foldeded: $foldeded")
-    //
-    //    type A = JobList
-    //    type B = Seq[JobList]
-    //    val jobs = Stream[JobList]().foldLeft(JobList(first = true, null, Seq()))(
-    //      op = )
-
     val first: Future[JobList] = listPageOfJobs(first = true, nextToken = null)
 
     def loop(nt: String, currList: Seq[JobList]): Future[Seq[JobList]] = {
       listPageOfJobs(first = false, nextToken = nt) flatMap { sjl =>
-        if (sjl.nextToken != null) {
-          loop(sjl.nextToken, currList ++ Seq(sjl))
-        } else {
-          Future(currList ++ Seq(sjl))
+        sjl.nextToken match {
+          case null => Future(currList :+ sjl)
+          case nxt => loop(sjl.nextToken, currList :+ sjl)
         }
       }
     }
 
     val listFuture: Future[Seq[JobList]] = first flatMap { jl =>
-      if (jl.nextToken != null) {
-        loop(jl.nextToken, Seq(jl))
-      } else {
-        Future(Seq(jl))
+      jl.nextToken match {
+        case null => Future(Seq(jl))
+        case nxt => loop(jl.nextToken, Seq(jl))
       }
     }
 
