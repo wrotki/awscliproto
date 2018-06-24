@@ -53,7 +53,7 @@ object Hello extends App {
     val len = list.length
     val lfirst = list.head
 
-    println(s"list length: $lfirst")
+    println(s"list length: $len , list: $lfirst")
   }
 
   //  http://aws-java-sdk-javadoc.s3-website-us-west-2.amazonaws.com/latest/overview-summary.html
